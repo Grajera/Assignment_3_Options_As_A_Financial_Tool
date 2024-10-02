@@ -3,10 +3,11 @@
 Group Members:
 - TODO: Add your name here
 - Chase Mortensen
+- Michael Grajera
 
 ## Running the program
 
-In order to run the program, install the following packages: `pandas`, `matplotlib`, `numpy`, and `scipy`.
+In order to run the program, install the following packages: `pandas`, `matplotlib`, `numpy`, `numba`, and `scipy`.
 
 Then, run
 
@@ -53,3 +54,30 @@ The Log-Normal has a lower K-S statistic and higher p-value, which signifies a b
   - p-value 0.974
 
 Again, the Log-Normal distribution has a lower K-S statistic and higher p-value than the Normal distribution, so it is also a better fit for the Stock 2 data.
+
+## Part 2: Monte Carlo Simulation for Vanilla European Option Pricing
+
+__Task:__ Write Python code to simulate the 5000 Monte Carlo simulations and compute the European option price.
+
+![image info](./img/Monte_Carlo_Paths.png)
+<p align="center">Fig. 3. Monte Carlo simulated stock paths charted.</p>
+
+![image info](./img/Final_Stock_Prices_At_Maturity.png)
+<p align="center">Fig. 4. Distribution of final stock prices at maturity.</p>
+
+The following are the paramaters were used for the above graphs:
+<ul>
+<li>The asset follows a beta distribution with parameters (9, 10), shifted to the left by 0.35.</li>
+<li>Volatility is 17.04 </li>
+<li>Drift is 0.03.</li>
+<li>The option matures in 1 year (365 days).</li>
+<li>The initial stock price is $100.</li>
+<li>The strike price is $100</li>
+<li>Risk-free interest rate of 2%</li>
+</ul>
+
+According to our simulation:
+
+1. Average stock price after 365 days: 102.78
+2. Average payoff (before discounting): 8.24
+3. Cost of the option (discounted payoff): 8.08
