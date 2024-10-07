@@ -4,6 +4,7 @@ Group Members:
 - TODO: Add your name here
 - Chase Mortensen
 - Michael Grajera
+- Anthony Wilson
 
 ## Running the program
 
