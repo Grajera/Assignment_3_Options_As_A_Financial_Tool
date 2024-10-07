@@ -5,6 +5,7 @@ Group Members:
 - Chase Mortensen
 - Michael Grajera
 - Anthony Wilson
+- Peter Gomez
 
 ## Running the program
 
