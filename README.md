@@ -4,6 +4,7 @@ Group Members:
 - TODO: Add your name here
 - Chase Mortensen
 - Michael Grajera
+- Peter Gomez
 
 ## Running the program
 
