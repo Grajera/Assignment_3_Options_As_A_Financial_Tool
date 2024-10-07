@@ -63,6 +63,7 @@ def part_one():
     ks_test_normal1 = kstest(prices_stock1, 'norm', args=(mu1, std1))
     ks_test_lognorm1 = kstest(prices_stock1, 'lognorm', args=(shape1, loc1, scale1))
 
+    print(f"\nPart 1: Fitting Stock Data to Distributions")
     print(f"Stock 1 - Normal K-S Test: {ks_test_normal1}")
     print(f"Stock 1 - Log-Normal K-S Test: {ks_test_lognorm1}")
 
@@ -130,6 +131,7 @@ def part_two():
     avg_final_price, avg_payoff, option_price = monte_carlo_simulation(N_SIMULATIONS, T, S0, K, VOLATILITY, DRIFT, RISK_FREE_RATE)
     
     # Print data out to console for the european option price.
+    print(f"\nPart 2: Monte Carlo Simulation for Vanilla European Option Pricing")
     print(f"Average stock price after 365 days: {avg_final_price:.2f}")
     print(f"Average payoff (before discounting): {avg_payoff:.2f}")
     print(f"Cost of the option (discounted payoff): {option_price:.2f}")
@@ -168,7 +170,95 @@ def part_two():
     plt.legend()
     plt.show()
 
+#Monte Carlo with Basket Option
+@njit(parallel=True)
+def monte_carlo_basket_option(n_simulations, T, S0_1, S0_2, volatility_1, volatility_2, drift_1, drift_2, K, risk_free_rate):
+    dt = 1 / 365  # Time step (1 day)
+    final_prices_1 = np.zeros(n_simulations)
+    final_prices_2 = np.zeros(n_simulations)
+    payoffs_scenario_1 = np.zeros(n_simulations)
+    payoffs_scenario_2 = np.zeros(n_simulations)
+
+    for i in prange(n_simulations):
+        stock_price_1 = S0_1
+        stock_price_2 = S0_2
+
+        # Simulate both stock price paths over time
+        for t in range(T):
+            Z1 = np.random.normal()  # Standard normal random variable for stock1
+            Z2 = np.random.normal()  # Standard normal random variable for stock2
+            stock_price_1 *= np.exp((drift_1 - 0.5 * volatility_1 ** 2) * dt + volatility_1 * np.sqrt(dt) * Z1)
+            stock_price_2 *= np.exp((drift_2 - 0.5 * volatility_2 ** 2) * dt + volatility_2 * np.sqrt(dt) * Z2)
+
+        # Store the final stock prices after 365 days
+        final_prices_1[i] = stock_price_1
+        final_prices_2[i] = stock_price_2
+
+        # Scenario 1: Payoff based on the average of both stock prices at maturity
+        average_price = (stock_price_1 + stock_price_2) / 2
+        payoffs_scenario_1[i] = max(average_price - K, 0)
+
+        # Scenario 2: Payoff based on the maximum of both stock prices at maturity
+        max_price = max(stock_price_1, stock_price_2)
+        payoffs_scenario_2[i] = max(max_price - K, 0)
+
+    # Discount the average payoffs to present value (cost of the option)
+    discounted_payoff_scenario_1 = np.exp(-risk_free_rate * T / 365) * np.mean(payoffs_scenario_1)
+    discounted_payoff_scenario_2 = np.exp(-risk_free_rate * T / 365) * np.mean(payoffs_scenario_2)
+
+    return discounted_payoff_scenario_1, discounted_payoff_scenario_2
+
+# Main function for part_three, which includes the Monte Carlo Simulation with Basket Option
+def part_three():
+    # Load datasets for stock1 and stock2 (no headers, just prices)
+    stock1 = pd.read_csv('data/stock1.csv', header=None, names=['Price'])
+    stock2 = pd.read_csv('data/stock2.csv', header=None, names=['Price'])
+
+    # Remove non-finite values (NaN, inf) from the stock prices
+    prices_stock1 = stock1['Price'].dropna()
+    prices_stock2 = stock2['Price'].dropna()
+
+    # Fit a Log-Normal distribution to the stock prices (best-fitting distribution from Part 1)
+    shape1, loc1, scale1 = lognorm.fit(prices_stock1, floc=0)
+    shape2, loc2, scale2 = lognorm.fit(prices_stock2, floc=0)
+
+    # Run the Monte Carlo simulation for both stocks
+    option_price_scenario_1, option_price_scenario_2 = monte_carlo_basket_option(
+        N_SIMULATIONS, T, S0, S0, VOLATILITY, VOLATILITY, DRIFT, DRIFT, K, RISK_FREE_RATE)
+
+    # Print the results for both scenarios
+    print(f"\nPart 3: Stochastic Jumps and Basket Option Pricing")
+    print(f"Option price for Average value: {option_price_scenario_1:.2f}")
+    print(f"Option price for Maximum value: {option_price_scenario_2:.2f}")
+
+    # Plot a histogram of the final stock prices for both stocks (from Monte Carlo)
+    final_prices_1 = np.zeros(N_SIMULATIONS)
+    final_prices_2 = np.zeros(N_SIMULATIONS)
+
+    for i in range(N_SIMULATIONS):
+        stock_price_1 = S0
+        stock_price_2 = S0
+        for t in range(T):
+            Z1 = np.random.normal()
+            Z2 = np.random.normal()
+            stock_price_1 *= np.exp((DRIFT - 0.5 * VOLATILITY ** 2) * (1 / 365) + VOLATILITY * np.sqrt(1 / 365) * Z1)
+            stock_price_2 *= np.exp((DRIFT - 0.5 * VOLATILITY ** 2) * (1 / 365) + VOLATILITY * np.sqrt(1 / 365) * Z2)
+        final_prices_1[i] = stock_price_1
+        final_prices_2[i] = stock_price_2
+
+    # Plot histograms for the final stock prices at maturity
+    plt.figure(figsize=(10, 6))
+    plt.hist(final_prices_1, bins=50, alpha=0.7, color='blue', label='Final Stock 1 Prices')
+    plt.hist(final_prices_2, bins=50, alpha=0.7, color='green', label='Final Stock 2 Prices')
+    plt.axvline(x=K, color='red', linestyle='dashed', linewidth=2, label='Strike Price')
+    plt.title('Distribution of Final Stock Prices at Maturity (Best Fit Distribution vs Monte Carlo with Basket Options)')
+    plt.xlabel('Stock Price')
+    plt.ylabel('Frequency')
+    plt.legend()
+    plt.show()
+
 if __name__ == "__main__":
-    # Run part one (stock analysis) and part two (option pricing)
+    # Run part one (stock analysis), part two (option pricing), and part three (basket option pricing)
     part_one()
     part_two()
+    part_three()

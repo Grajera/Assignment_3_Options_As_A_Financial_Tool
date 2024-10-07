@@ -81,3 +81,15 @@ According to our simulation:
 1. Average stock price after 365 days: 102.78
 2. Average payoff (before discounting): 8.24
 3. Cost of the option (discounted payoff): 8.08
+
+## Part 3: Stochastic Jumps and Basket Option Pricing
+
+__Task:__ Write python code to simulate and compare the stocks using the best-fitting distributions (part 1) and The Monte Carlo simulations (part 2) with basket options.
+
+![image info](./img/Monte_Carlo_Basket_vs_Best_Fit.png)
+<p align="center">Fig. 5. Distribution of Final Stock Prices at Maturity (Best Fit Distribution vs Monte Carlo with Basket Options).</p>
+
+Option price for Average value: 6.45
+Option price for Maximum value: 14.22
+
+After running the simulation repeatedly, the results reflect the graph and the Option prices above with minor variance, showing that the Monte Carlo simulation with the basket options comes out on top on average about 8-10$ higher.
