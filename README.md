@@ -1,7 +1,6 @@
 # Assignment_3_Options_As_A_Financial_Tool
 
 Group Members:
-- TODO: Add your name here
 - Chase Mortensen
 - Michael Grajera
 - Anthony Wilson
@@ -17,7 +16,7 @@ Then, run
 python main.py
 ```
 
-You may comment out specific sections in the `main` function.
+You can comment out specific sections of the `main` function to execute one part at a time; otherwise, the function will run each task sequentially.
 
 ## Part 1: Fitting Stock Data to Distributions
 
